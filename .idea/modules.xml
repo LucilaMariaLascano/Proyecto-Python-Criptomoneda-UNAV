@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Proyecto_Python_Cripto.iml" filepath="$PROJECT_DIR$/.idea/Proyecto_Python_Cripto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Python Sesion3/master_python_projects/.idea/master_python_projects.iml" filepath="$PROJECT_DIR$/../Python Sesion3/master_python_projects/.idea/master_python_projects.iml" />
+    </modules>
+  </component>
+</project>
