@@ -7,18 +7,6 @@ import pandas as pd
 import numpy as np
 import krakenex
 
-external_stylesheets = [
-    {
-        "href": "https://fonts.googleapis.com/css2?"
-                "family=Lato:wght@400;700&display=swap",
-        "rel": "stylesheet",
-    },
-]
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "Cotización de las criptomonedas"
-server = app.server
-
-
 class Criptomoneda:
     """
     Clase utilizada para criptomonedas
@@ -75,7 +63,6 @@ intervalos_tiempo = [(1, "1 minuto"), (5, "5 minutos"), (15, "15 minutos"),
 
 
 # Creación del gráfico
-
 external_stylesheets = [
     {
         "href": "https://fonts.googleapis.com/css2?"
@@ -83,9 +70,10 @@ external_stylesheets = [
         "rel": "stylesheet",
     },
 ]
-
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "Cotizaciones de las criptomonedas"
+app.title = "Cotización de las criptomonedas"
+server = app.server
+
 
 # Layout del gráfico
 app.layout = html.Div(
