@@ -1,17 +1,17 @@
 body {
-    font-family: "Lato", sans-serif;
+    font-family: "Lato", "Arial";
     margin: 0;
-    background-color: #F7F7F7;
+    background-color: #C7DDFC;
 }
 
 .header {
-    background-color: #222222;
+    background-color: #083A82;
     height: 288px;
     padding: 16px 0 0 0;
 }
 
 .header-emoji {
-    font-size: 48px;
+    font-size: 60px;
     margin: 0 auto;
     text-align: center;
 }
@@ -28,7 +28,8 @@ body {
     color: #CFCFCF;
     margin: 4px auto;
     text-align: center;
-    max-width: 384px;
+    max-width: 660px;
+    font-weight: bold;
 }
 
 .wrapper {
@@ -46,7 +47,7 @@ body {
 }
 
 .menu {
-    height: 112px;
+    height: 100px;
     width: 912px;
     display: flex;
     justify-content: space-evenly;
@@ -72,5 +73,5 @@ body {
 .menu-title {
     margin-bottom: 6px;
     font-weight: bold;
-    color: #079A82;
+    color: #053170;
 }

@@ -85,10 +85,9 @@ app.layout = html.Div(
                     children="Cotización de las criptomonedas", className="header-title"
                 ),
                 html.P(
-                    children="Gráfico de la cotización de las criptomonedas frente al "
-                             "Dólar Estadounidense (USD) o al Euro (EUR) en el mercado "
-                             "de las criptomonedas. "
-                             "Fuente:@Kraken",
+                    children=['Gráfico de la cotización de las criptomonedas frente al', html.Br(),
+                             'Dólar Estadounidense (USD) o al Euro (EUR)', html.Br(),
+                             'Fuente:@Kraken'],
                     className="header-description"
                 ),
             ],
@@ -198,10 +197,11 @@ def update_charts(filtro_par_cripto, intervalos_tiempo, seleccion_fechas):
     df["Close"] = df["Close"].apply(pd.to_numeric)
     df["Volume"] = df["Volume"].apply(pd.to_numeric)
 
-    # Calculo del VWAP
+    # Calculo del nuevo VWAP_calculado
     df["VWAP_calculado"] = (np.cumsum(
                                         df.Volume * ((df.High + df.Low + df.Close) / 3)) / np.cumsum(df.Volume)
                             )
+    # Gráfico
     price_chart_figure = {
             "data": [
                 {
