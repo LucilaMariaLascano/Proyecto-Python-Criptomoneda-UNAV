@@ -1,11 +1,16 @@
 [tool.poetry]
 name = "Proyecto_Python_Cripto"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Trabajo Final de Pyhton: Cotización de Criptomonedas"
+authors = ["Lucila M Lascano <llascano@alumni.unav.es>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+dash = "2.0.0"
+pandas = "1.3.4"
+gunicorn = "20.0.4"
+krakenex = "2.1.0"
+numpy = "1.20.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -13,3 +18,4 @@ pytest = "^5.2"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
