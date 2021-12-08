@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import krakenex
 
+
 class Criptomoneda:
     """
     Clase utilizada para criptomonedas
@@ -42,7 +43,11 @@ class Criptomoneda:
                                          'interval': self.intervalo,
                                          'since': self.fecha
                                          }
-                                          )
+                                         )
+        # Se verifica que venga el resultado de Kraken.
+        # En caso contrario, se lanza un error.
+        if not len(crypto_data['result']) > 0:
+            raise KeyError("Ha ocurrido un error")
 
         return crypto_data['result'][self.moneda]
 
@@ -86,8 +91,8 @@ app.layout = html.Div(
                 ),
                 html.P(
                     children=['Gráfico de la cotización de las criptomonedas frente al', html.Br(),
-                             'Dólar Estadounidense (USD) o al Euro (EUR)', html.Br(),
-                             'Fuente:@Kraken'],
+                              'Dólar Estadounidense (USD) o al Euro (EUR)', html.Br(),
+                              'Fuente:@Kraken'],
                     className="header-description"
                 ),
             ],
@@ -180,69 +185,76 @@ def update_charts(filtro_par_cripto, intervalos_tiempo, seleccion_fechas):
             """
     seleccion_fechas_int = int(datetime.strptime(seleccion_fechas, '%Y-%m-%d').timestamp())
 
-    # Construcción del dataset.
+    # Construcción del dataset
     criptomoneda = Criptomoneda(filtro_par_cripto, intervalos_tiempo, seleccion_fechas_int)
-    df = pd.DataFrame(data=criptomoneda.obtener_cotizaciones(),
-                      columns=["Time", "Open", "High", "Low",
-                               "Close", "VWAP", "Volume", "Count"]
-                      )
-    # Conversión de la fecha obtenida de Kraken al formato necesario.
-    df["Date"] = pd.to_datetime(df.Time, unit='s')
+    price_chart_figure = {}
+    try:
+        df = pd.DataFrame(data=criptomoneda.obtener_cotizaciones(),
+                          columns=["Time", "Open", "High", "Low",
+                                   "Close", "VWAP", "Volume", "Count"]
+                          )
+        # Conversión de la fecha obtenida de Kraken al formato necesario.
+        df["Date"] = pd.to_datetime(df.Time, unit='s')
 
-    # Se convierten los precios a valor numérico para poder operar con ellos
-    # porque vienen como objeto
-    df["Open"] = df["Open"].apply(pd.to_numeric)
-    df["High"] = df["High"].apply(pd.to_numeric)
-    df["Low"] = df["Low"].apply(pd.to_numeric)
-    df["Close"] = df["Close"].apply(pd.to_numeric)
-    df["Volume"] = df["Volume"].apply(pd.to_numeric)
+        # Se convierten los precios a valor numérico para poder operar con ellos
+        # porque vienen como objeto
+        df["Open"] = df["Open"].apply(pd.to_numeric)
+        df["High"] = df["High"].apply(pd.to_numeric)
+        df["Low"] = df["Low"].apply(pd.to_numeric)
+        df["Close"] = df["Close"].apply(pd.to_numeric)
+        df["Volume"] = df["Volume"].apply(pd.to_numeric)
 
-    # Calculo del nuevo VWAP_calculado
-    df["VWAP_calculado"] = (np.cumsum(
-                                        df.Volume * ((df.High + df.Low + df.Close) / 3)) / np.cumsum(df.Volume)
-                            )
-    # Gráfico
-    price_chart_figure = {
-            "data": [
-                {
-                    "x": df["Date"],
-                    "y": df["Low"],
-                    "type": "lines",
-                    "name": "Low",
-                    "hovertemplate": "$%{y:.2f}<extra></extra>",
-                },
-                {
-                    "x": df["Date"],
-                    "y": df["High"],
-                    "type": "lines",
-                    "name": "High",
-                    "hovertemplate": "$%{y:.2f}<extra></extra>",
-                },
-                {
-                    "x": df["Date"],
-                    "y": df["VWAP_calculado"],
-                    "type": "lines",
-                    "name": "VWAP",
-                    "line":{
-                        "dash": 'dot',
-                        "with": 6
+        # Calculo del nuevo VWAP_calculado
+        df["VWAP_calculado"] = (np.cumsum(
+                                            df.Volume * ((df.High + df.Low + df.Close) / 3)) / np.cumsum(df.Volume)
+                                )
+        # Gráfico
+        price_chart_figure = {
+                "data": [
+                    {
+                        "x": df["Date"],
+                        "y": df["Low"],
+                        "type": "lines",
+                        "name": "Low",
+                        "hovertemplate": "$%{y:.2f}<extra></extra>",
                     },
-                    "hovertemplate": "$%{y:.2f}<extra></extra>",
+                    {
+                        "x": df["Date"],
+                        "y": df["High"],
+                        "type": "lines",
+                        "name": "High",
+                        "hovertemplate": "$%{y:.2f}<extra></extra>",
+                    },
+                    {
+                        "x": df["Date"],
+                        "y": df["VWAP_calculado"],
+                        "type": "lines",
+                        "name": "VWAP",
+                        "line":{
+                            "dash": 'dot',
+                            "with": 6
+                        },
+                        "hovertemplate": "$%{y:.2f}<extra></extra>",
+                    },
+                ],
+                "layout": {
+                    "title": {
+                        "text": "Evolución de los precios de las criptomonedas",
+                        "x": 0.05,
+                        "xanchor": "left",
+                    },
+                    "xaxis": {"fixedrange": True},
+                    "yaxis": {"tickprefix": "$", "fixedrange": True},
+                    "colorway": ["#ff0000", "#10a700", "#000000"],
                 },
-            ],
-            "layout": {
-                "title": {
-                    "text": "Evolución de los precios de las criptomonedas",
-                    "x": 0.05,
-                    "xanchor": "left",
-                },
-                "xaxis": {"fixedrange": True},
-                "yaxis": {"tickprefix": "$", "fixedrange": True},
-                "colorway": ["#ff0000", "#10a700", "#000000"],
-            },
-        }
+            }
 
-    return price_chart_figure
+    except KeyError:
+        print("Ha ocurrido un error al obtener los datos de Kraken")
+    finally:
+        # Se devuelve el diccionario con la información del gráfico,
+        # o vacío si ha ocurrido un error
+        return price_chart_figure
 
 
 if __name__ == "__main__":
