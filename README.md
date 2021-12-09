@@ -24,7 +24,9 @@ Python, teniendo en cuenta las librerías necesarias para poder representar y gr
 correctamente la información correspondiente.
 
 Para conseguir dicho objetivo, en primer lugar, se ha utilizado una API de Kraken con el
-fin de leer el movimiento de los pares de criptomonedas.
+fin de leer el movimiento de los pares de criptomonedas. Al mismo tiempo, se ha
+agregado el manejo de errores para aquellos casos en los cuales al conectarse a la
+interfaz de programación de aplicaciones no haya ningún resultado.
 
 Con dicha información se ha creado el dataset, sobre el cual en algunos casos fue
 necesario transformar el tipo de dato. Si bien la información obtenida brindaba el valor
@@ -34,13 +36,57 @@ VWAP_calculado, el cual fue utilizado luego en la gráfica.
 Se ha ideado crear un gráfico de líneas con la opción de agregar menús desplegables
 para que el usuario pudiera seleccionar el par de monedas, intervalo y fechas
 correspondientes. Para ello fue necesario, crear anticipadamente los listados
-predefinidos en el caso de monedas e intervalos, y un calendario para las fechas.
+predefinidos en el caso de monedas e intervalos, y un componente DatePicker
+(calendario) para las fechas.
 
 Una vez construido el dataset y generados los listados para los menús desplegables, a
-partir de una función se ha procedido a graficar y actualizar conjuntamente las 
+partir de una función se ha procedido a graficar y actualizar conjuntamente las
 cotizaciones (low y high) del par calculado, y el VWAP_calculado teniendo en cuenta los
 parámetros seleccionados por el usuario.
 
+### Inicialización del proyecto
+
+Para inicializar el proyecto utilizamos poetry new Proyecto_Python_Cripto y poetry
+init los cuales crean una estructura de proyecto por defecto para poder comenzar a
+trabajar.
+
+Las librerías han sido agregadas utilizando el comando poetry add el cual agrega las
+mismas al archivo pyproject.toml.
+
+```
+python = "^3.8"
+dash==2.0.
+pandas==1.3.
+gunicorn==20.0.
+krakenex==2.1.
+numpy==1.20.
+```
+Las mismas librerías se han incorporado al archivo requirements.txt de dónde son leídas
+para ser instaladas en Heroku al momento de subir la aplicación.
+
+Para ejecutar la aplicación en su entorno local, luego de clonarlo desde el repositorio
+indicado a continuación, debe ejecutarse el comando poetry install el cual leerá las
+dependencias del archivo pyproject.toml y las instalará en su ordenador.
+
+El archivo para inicializar la aplicación es el app.py el cual debe ser ejecutado desde
+PyCharm como archivo de entrada a la aplicación.
+
+#### Repositorio
+
+Como repositorio colaborativo de código se ha utilizado GitHub para mantener el control
+de versiones del proyecto.
+
+Se puede acceder al código clonándolo del siguiente repositorio:
+
+https://github.com/LucilaMariaLascano/Proyecto-Python-Criptomoneda-UNAV
+
+
+#### Distribución del código
+
+A los efectos de presentar el resultado del trabajo el código ha sido distribuido en la
+nube a través de Heroku, siendo la URL correspondiente la siguiente:
+
+https://guarded-sands-06815.herokuapp.com/
 
 ### Elementos utilizados
 
@@ -88,19 +134,25 @@ Devuelve OHLC data desde el ID brindado
 
 #### Clases
 
-Se ha creado  la clase Criptomoneda, con sus correspondientes atributos y
-métodos.
+Para cumplir con la Programación Orientada a Objetos se ha creado la clase
+Criptomoneda, que contiene toda la información necesaria del par a estudiar. En ella se
+pueden encontrar los siguientes atributos y métodos:
 
 _Atributos de la Clase_
 
-- Moneda
-- Intervalo
-- Fecha
+- Moneda – string – indica el par de la cotización de criptomoneda. Ej: Bitcoin/USD.
+- Intervalo – integer - intervalo en el cual la API agrupa los precios mostrados.
+    Ejemplo: 1 minuto, 1 día, 1 semana, etc.
+- Fecha – timestamp – fecha en formato Timestamp que representa la fecha de
+    inicio desde la cual se obtienen las cotizaciones. La API devuelve sólo 720
+    registros desde esta fecha de inicio, con el intervalo indicado anteriormente.
 
 _Métodos de la Clase_
 
-Se crea la función obtener_cotizaciones () que permite adquirir las cotizaciones de
-criptomonedas de Kraken, y crear con dicha información el dataset.
+- obtener_cotizaciones () – este método permite adquirir las cotizaciones de
+    criptomonedas de Kraken, y crear con dicha información el dataset. El mismo no
+    recibe parámetros, sino que lee los datos necesarios directamente de los
+    atributos de la clase.
 
 #### Favicon
 
@@ -116,14 +168,16 @@ El dataset se encuentra conformado por las siguientes columnas:
 - Time
 - Open
 - High
-- LowClose
-- VWAP: VWAP que viene por defecto de Kraken.
+- Low
+- Close
+- VWAP: VWAP que se obtiene por defecto de Kraken.
 - Volume
 - Count
-- VWAP calculado: VWAP calculado y utilizado para visualizar en el gráfico
+- Date: se crea esta nueva variable gracias a la función pandas to datetime,
+    convirtiendo la variable ‘Time’ que se encuentra en formato timestamp, al
+    formato YYYY-MM-DD.
+- VWAP_calculado: VWAP calculado y utilizado para visualizar en el gráfico
     construido.
-- Date: se crea esta nueva variable gracias a la función pandas to datetime, convirtiendo la variable ‘Time’ que se encuentra
-    en segundos, al formato YYYY-MM-DD.
 
 
 #### Cálculo del nuevo VWAP
@@ -137,15 +191,16 @@ dividido la sumatoria del Volumen.
 
 Sin embargo, para poder realizar dicha operatoria primero fue necesario convertir los
 precios (Open, High, Low, Close y Volume) a valor numérico con el método
-_‘_ apply(pd.to_numeric) _’_ ya que los mismos estaban creados como tipo objeto.
+_‘apply(pd.to_numeric)’_ ya que los mismos eran de tipo Object..
 
 ### Creación del gráfico
 
-La información obtenida en el dataset se representa a través de un gráfico de líneas
-dinámico generado con la ayuda de la librería dash.
+A partir de la información obtenida en el dataset se genera un gráfico de líneas dinámico
+con la ayuda de las librerías dash y plotly.
 
 Para realizarlo y actualizar sus valores se llama a la función update_charts con los
-parámetros: filtro_par_cripto, intervalos_tiempo y seleccion_fechas.
+parámetros: filtro_par_cripto, intervalos_tiempo y seleccion_fechas, cuyos valores se
+obtienen de los componentes de los filtros.
 
 En términos generales la gráfica muestra el comportamiento de la cotización de un par
 de criptomonedas y del VWAP a través de un intervalo de tiempo prestablecido.
@@ -189,18 +244,27 @@ El listado de intervalos a escoger por el usuario es el siguiente:
 
 _Fecha_
 
-La fecha ha sido creada con un date picker single, con las siguientes características:
+La fecha ha sido creada con un componente DatePickerSingle, con las siguientes
+características:
 
 - El mínimo de la fecha desde la cual se quiere visualizar la información se ha
     establecido en 01/01/2021 (hasta la fecha actual), con el fin de no cargar
     demasiado la página web.
 - La fecha desde la cual se quiere visualizar los datos puede ser seleccionada por
     el usuario. Sin embargo, la fecha hasta la cual se pueden representar siempre
-    va a ser el día de la fecha que el usuario ejecute el gráfico. La misma no permite
-    selección por parte del usuario.
+    va a ser el día de la fecha que el usuario ejecute el gráfico.
 - La fecha se ha convertido a formato '%Y-%m-%d', por ejemplo: 2021- 01 - 01, para
     una mejor visualización y entendimiento del usuario.
 
+### Manejo de errores
+
+Con el objetivo de manejar errores de ejecución, se ha utilizado el bloque Try-Except
+para aquellos casos en los cuales al conectarse a la API de Kraken no haya ningún
+resultado, verificando la clave del result en el JSON obtenido de la respuesta de Kraken.
+
+Asimismo, se ha ubicado al final un bloque Finally, que en caso de error devuelve un
+objeto vacío ya que no se pudo obtener la información de la API, y despliegue en la
+consola el mensaje "Ha ocurrido un error al obtener los datos de Kraken".
 
 ## RESULTADO
 
